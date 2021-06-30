@@ -1,3 +1,6 @@
+using System;
+using System.IO;
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,21 +14,30 @@ public class MainManager : MonoBehaviour
     public Rigidbody Ball;
 
     public Text ScoreText;
+    public Text HighScoreText;
     public GameObject GameOverText;
-    
+    public GameObject GameOverTextHighScore;
+    public InputField nameInput;
+
     private bool m_Started = false;
     private int m_Points;
-    
-    private bool m_GameOver = false;
 
-    
+    private int m_HighScore = 0;
+    private string m_HighScoreName = "no name";
+
+    private bool m_GameOver = false;
+    private bool m_GameOverHighScore = false;
+
+    private string myName = "James";
+
+
     // Start is called before the first frame update
     void Start()
     {
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
-        
-        int[] pointCountArray = new [] {1,1,2,2,5,5};
+
+        int[] pointCountArray = new[] { 1, 1, 2, 2, 5, 5 };
         for (int i = 0; i < LineCount; ++i)
         {
             for (int x = 0; x < perLine; ++x)
@@ -36,6 +48,9 @@ public class MainManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
+
+        LoadHighScore();
+        HighScoreText.text = ($"Best Score: {m_HighScoreName} : {m_HighScore}");
     }
 
     private void Update()
@@ -45,7 +60,7 @@ public class MainManager : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 m_Started = true;
-                float randomDirection = Random.Range(-1.0f, 1.0f);
+                float randomDirection = UnityEngine.Random.Range(-1.0f, 1.0f);
                 Vector3 forceDir = new Vector3(randomDirection, 1, 0);
                 forceDir.Normalize();
 
@@ -60,7 +75,17 @@ public class MainManager : MonoBehaviour
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
         }
+        else if (m_GameOverHighScore)
+        {
+
+        }
     }
+
+    private void EnterHighScore()
+    {
+
+    }
+
 
     void AddPoint(int point)
     {
@@ -70,7 +95,57 @@ public class MainManager : MonoBehaviour
 
     public void GameOver()
     {
-        m_GameOver = true;
-        GameOverText.SetActive(true);
+        if (m_Points < m_HighScore)
+        {
+            m_GameOver = true;
+            GameOverText.SetActive(true);
+        }
+        else
+        {
+            m_GameOverHighScore = true;
+            GameOverTextHighScore.SetActive(true);
+        }
+
+    }
+
+    public void InputToName()
+    {
+        m_HighScoreName = nameInput.text;
+        SaveHighScore();
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    public void SaveHighScore()
+    {
+        SaveData data = new SaveData();
+
+        data.name = m_HighScoreName;
+        data.score = m_Points;
+
+        string json = JsonUtility.ToJson(data);
+
+        File.WriteAllText(Application.persistentDataPath + "/savefile.json", json);
+    }
+
+    public void LoadHighScore()
+    {
+        string path = Application.persistentDataPath + "/savefile.json";
+
+        if (File.Exists(path))
+        {
+            string json = File.ReadAllText(path);
+            SaveData data = JsonUtility.FromJson<SaveData>(json);
+
+            m_HighScore = data.score;
+            m_HighScoreName = data.name;
+        }
+
+    }
+
+    [System.Serializable]
+    class SaveData
+    {
+        public string name;
+        public int score;
     }
 }
