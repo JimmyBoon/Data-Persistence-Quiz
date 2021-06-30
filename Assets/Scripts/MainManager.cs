@@ -1,8 +1,4 @@
-using System;
 using System.IO;
-
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -27,9 +23,6 @@ public class MainManager : MonoBehaviour
 
     private bool m_GameOver = false;
     private bool m_GameOverHighScore = false;
-
-    private string myName = "James";
-
 
     // Start is called before the first frame update
     void Start()
@@ -79,11 +72,6 @@ public class MainManager : MonoBehaviour
         {
 
         }
-    }
-
-    private void EnterHighScore()
-    {
-
     }
 
 
